@@ -35,7 +35,15 @@
 
   <h3>Detalles de la Factura</h3>
 
-  <div th:each="i : ${#numbers.sequence(0,2)}">
+  <div class="product-controls">
+    <button type="button" id="decreaseProducts" onclick="adjustProducts(-1)">-</button>
+    <span id="numProductsDisplay">1</span>
+    <button type="button" id="increaseProducts" onclick="adjustProducts(1)">+</button>
+    <input type="hidden" name="numProductos" id="numProductos" value="1"/>
+  </div>
+
+  <div id="productos-container">
+    <div th:each="i : ${#numbers.sequence(0, numProductos != null ? numProductos - 1 : 0)}" class="producto-item">
     <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
       <label>Producto:</label>
       <select name="productoId" class="producto-select" th:data-index="${i}" th:id="'producto-select-' + ${i}">
@@ -66,7 +74,23 @@
 </form>
 
 <script>
+function adjustProducts(change) {
+    var currentNum = parseInt($('#numProductos').val());
+    var newNum = Math.max(1, Math.min(10, currentNum + change));
+
+    $('#numProductos').val(newNum);
+    $('#numProductsDisplay').text(newNum);
+
+    // Update the form to show/hide product sections
+    $('.producto-item').each(function(index) {
+        $(this).toggle(index < newNum);
+    });
+}
+
 $(document).ready(function() {
+    // Initialize with one product
+    $('#numProductos').val(1);
+    $('#numProductsDisplay').text(1);
     console.log("JavaScript cargado correctamente");
 
     $(document).on('change', '.producto-select', function() {

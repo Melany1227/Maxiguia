@@ -39,7 +39,7 @@ public class FacturaController {
     private CiudadRepository ciudadRepository;
 
     @GetMapping("/nueva")
-    public String mostrarFormulario(Model model) {
+    public String mostrarFormulario(@RequestParam(value = "numProductos", defaultValue = "3") int numProductos, Model model) {
         model.addAttribute("factura", new Factura());
         model.addAttribute("detalles", new ArrayList<DetalleFactura>());
 
@@ -50,7 +50,7 @@ public class FacturaController {
             System.err.println("Error al cargar productos: " + e.getMessage());
             model.addAttribute("productos", productoRepository.findAll());
         }
-
+        model.addAttribute("numProductos", numProductos);
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
         model.addAttribute("empresas", empresaService.listarEmpresas());
         model.addAttribute("ciudades", ciudadRepository.findAll());
