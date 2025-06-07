@@ -10,6 +10,11 @@ import java.util.List;
 @Repository
 public interface TerminadoRepository extends JpaRepository<Terminado, Long> {
 
-    @Query("SELECT t FROM Terminado t WHERE t.idProducto = :productoId")
+    // Consulta nativa para asegurar que funcione con Oracle
+    @Query(value = "SELECT * FROM terminados WHERE id_producto = :productoId", nativeQuery = true)
     List<Terminado> findByProductoId(@Param("productoId") Long productoId);
+
+    // Método alternativo para debugging
+    @Query("SELECT t FROM Terminado t WHERE t.idProducto = :productoId")
+    List<Terminado> findByProductoIdJPQL(@Param("productoId") Long productoId);
 }

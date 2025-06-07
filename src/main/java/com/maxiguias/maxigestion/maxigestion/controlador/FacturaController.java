@@ -43,10 +43,16 @@ public class FacturaController {
         model.addAttribute("factura", new Factura());
         model.addAttribute("detalles", new ArrayList<DetalleFactura>());
 
-        // Use services that handle Oracle objects correctly
+        // Usar consulta nativa para productos
+        try {
+            model.addAttribute("productos", productoRepository.findAllProductosNative());
+        } catch (Exception e) {
+            System.err.println("Error al cargar productos: " + e.getMessage());
+            model.addAttribute("productos", productoRepository.findAll());
+        }
+
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
         model.addAttribute("empresas", empresaService.listarEmpresas());
-        model.addAttribute("productos", productoRepository.findAll());
         model.addAttribute("ciudades", ciudadRepository.findAll());
 
         return "factura-form";
