@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Nueva Factura</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <h1>Crear Nueva Factura</h1>
@@ -16,39 +17,135 @@
 
   <label>Usuario:</label>
   <select th:field="*{usuario.documento}">
+    <option value="">Seleccione usuario</option>
     <option th:each="u : ${usuarios}" th:value="${u.documento}" th:text="${u.nombreCompleto}"></option>
   </select><br>
 
   <label>Empresa:</label>
   <select th:field="*{empresa.nitEmpresa}">
+    <option value="">Seleccione empresa</option>
     <option th:each="e : ${empresas}" th:value="${e.nitEmpresa}" th:text="${e.nombre}"></option>
   </select><br>
 
   <label>Ciudad:</label>
   <select th:field="*{ciudad.id}">
+    <option value="">Seleccione ciudad</option>
     <option th:each="c : ${ciudades}" th:value="${c.id}" th:text="${c.nombre}"></option>
   </select><br><br>
 
   <h3>Detalles de la Factura</h3>
 
   <div th:each="i : ${#numbers.sequence(0,2)}">
-    <label>Producto:</label>
-    <select name="productoId">
-      <option th:each="p : ${productos}" th:value="${p.id}" th:text="${p.nombre}"></option>
-    </select>
+    <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+      <label>Producto:</label>
+      <select name="productoId" class="producto-select" th:data-index="${i}">
+        <option value="">Seleccione un producto</option>
+        <option th:each="p : ${productos}"
+                th:value="${p.id}"
+                th:text="${p.nombre}"
+                th:data-nombre="${p.nombre}"></option>
+      </select><br><br>
 
-    <label>Cantidad:</label>
-    <input type="number" name="cantidad" min="1" required>
+      <label>Terminado:</label>
+      <select name="terminadoId" class="terminado-select" th:data-index="${i}">
+        <option value="">Primero seleccione un producto</option>
+      </select><br><br>
 
-    <label>Valor:</label>
-    <input type="number" name="valor" step="0.01" required>
+      <label>Cantidad:</label>
+      <input type="number" name="cantidad" min="1" required><br><br>
 
-    <label>Descripción:</label>
-    <input type="text" name="descripcion">
-    <br><br>
+      <label>Valor:</label>
+      <input type="number" name="valor" step="0.01" required><br><br>
+
+      <label>Descripción:</label>
+      <input type="text" name="descripcion" class="descripcion-input" th:data-index="${i}">
+    </div>
   </div>
 
   <button type="submit">Guardar Factura</button>
 </form>
+
+<script>
+$(document).ready(function() {
+    console.log("JavaScript cargado correctamente");
+
+    // Cuando cambia el producto
+    $('.producto-select').on('change', function() {
+        console.log("Producto seleccionado");
+
+        var productoId = $(this).val();
+        var index = $(this).data('index');
+        var productoNombre = $(this).find('option:selected').data('nombre');
+        var terminadoSelect = $('.terminado-select[data-index="' + index + '"]');
+        var descripcionInput = $('.descripcion-input[data-index="' + index + '"]');
+
+        console.log("Producto ID:", productoId);
+        console.log("Index:", index);
+        console.log("Producto Nombre:", productoNombre);
+
+        // Limpiar terminados y descripción
+        terminadoSelect.empty().append('<option value="">Cargando terminados...</option>');
+        terminadoSelect.prop('disabled', false);
+        descripcionInput.val('');
+
+        if (productoId) {
+            // Cargar terminados del producto
+            $.get('/api/productos/' + productoId + '/terminados')
+                .done(function(terminados) {
+                    console.log("Terminados recibidos:", terminados);
+
+                    terminadoSelect.empty().append('<option value="">Seleccione terminado</option>');
+
+                    if (terminados.length > 0) {
+                        terminados.forEach(function(terminado) {
+                            terminadoSelect.append(
+                                '<option value="' + terminado.id + '" ' +
+                                'data-medida="' + terminado.medidaTerminadoProducto + '">' +
+                                terminado.medidaTerminadoProducto +
+                                '</option>'
+                            );
+                        });
+                        terminadoSelect.prop('disabled', false);
+                    } else {
+                        terminadoSelect.append('<option value="">No hay terminados disponibles</option>');
+                        terminadoSelect.prop('disabled', true);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('Error al cargar terminados:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+
+                    terminadoSelect.empty().append('<option value="">Error al cargar terminados</option>');
+                    terminadoSelect.prop('disabled', true);
+                });
+        } else {
+            terminadoSelect.empty().append('<option value="">Primero seleccione un producto</option>');
+            terminadoSelect.prop('disabled', true);
+        }
+    });
+
+    // Cuando cambia el terminado
+    $('.terminado-select').on('change', function() {
+        console.log("Terminado seleccionado");
+
+        var index = $(this).data('index');
+        var medida = $(this).find('option:selected').data('medida');
+        var productoSelect = $('.producto-select[data-index="' + index + '"]');
+        var productoNombre = productoSelect.find('option:selected').data('nombre');
+        var descripcionInput = $('.descripcion-input[data-index="' + index + '"]');
+
+        console.log("Medida:", medida);
+        console.log("Producto nombre:", productoNombre);
+
+        if (productoNombre && medida) {
+            var descripcion = productoNombre + ' - ' + medida;
+            descripcionInput.val(descripcion);
+            console.log("Descripción generada:", descripcion);
+        }
+    });
+});
+</script>
+
 </body>
 </html>
