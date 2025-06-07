@@ -85,6 +85,8 @@ public class Terminado {
                 ", idProducto=" + idProducto +
                 ", medidaTerminadoProducto=" + medidaTerminadoProducto +
                 ", precioPublico=" + precioPublico +
+                ", precioXMayor=" + precioXMayor +
+                ", precioXEncargo=" + precioXEncargo +
                 '}';
     }
 }

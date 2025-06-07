@@ -60,14 +60,27 @@
       </select><br><br>
 
       <label>Cantidad:</label>
-      <input type="number" name="cantidad" min="1" required th:id="'cantidad-' + ${i}"><br><br>
+      <input type="number" name="cantidad" class="cantidad-input" min="1" required th:id="'cantidad-' + ${i}" th:data-index="${i}"><br><br>
 
-      <label>Valor:</label>
-      <input type="number" name="valor" step="0.01" required th:id="'valor-' + ${i}"><br><br>
+      <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+          <label>Precio Unitario:</label>
+          <input type="number" class="precio-unitario" step="0.01" readonly th:id="'precio-unitario-' + ${i}" th:data-index="${i}">
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label>Valor Total:</label>
+          <input type="number" name="valor" class="valor-total calculated-value" step="0.01" required readonly th:id="'valor-' + ${i}" th:data-index="${i}">
+        </div>
+      </div>
 
       <label>Descripción:</label>
       <input type="text" name="descripcion" class="descripcion-input" th:data-index="${i}" th:id="'descripcion-' + ${i}" readonly>
     </div>
+  </div>
+
+  <div style="margin-top: 20px; text-align: center;">
+    <h3>Total Factura: $<span id="total-factura">0.00</span></h3>
   </div>
 
   <button type="submit">Guardar Factura</button>
@@ -122,6 +135,7 @@ $(document).ready(function() {
                                 $('<option>', {
                                     value: terminado.id,
                                     'data-medida': medida,
+                                    'data-precio': terminado.precioPublico,
                                     text: medida === '0' ? 'Sin medida' : medida
                                 })
                             );
@@ -149,15 +163,34 @@ $(document).ready(function() {
         }
     });
 
+    function calcularValorProducto(index) {
+        var cantidad = parseFloat($('#cantidad-' + index).val()) || 0;
+        var precioUnitario = parseFloat($('#precio-unitario-' + index).val()) || 0;
+        var valorTotal = cantidad * precioUnitario;
+
+        $('#valor-' + index).val(valorTotal.toFixed(2));
+        calcularTotalFactura();
+    }
+
+    function calcularTotalFactura() {
+        var total = 0;
+        $('.valor-total').each(function() {
+            var valor = parseFloat($(this).val()) || 0;
+            total += valor;
+        });
+
+        $('#total-factura').text(total.toFixed(2));
+    }
+
     $(document).on('change', '.terminado-select', function() {
         var $this = $(this);
         var index = $this.data('index');
         var medida = $this.find('option:selected').data('medida');
+        var precio = $this.find('option:selected').data('precio');
         var $productoSelect = $('#producto-select-' + index);
         var productoNombre = $productoSelect.find('option:selected').data('nombre');
         var $descripcionInput = $('#descripcion-' + index);
-
-        console.log("Terminado seleccionado - Medida:", medida, "Producto:", productoNombre);
+        var $precioUnitario = $('#precio-unitario-' + index);
 
         if (productoNombre) {
             var descripcion = productoNombre;
@@ -165,10 +198,19 @@ $(document).ready(function() {
                 descripcion += ' - ' + medida;
             }
             $descripcionInput.val(descripcion);
-            console.log("Descripción generada:", descripcion);
+
+            $precioUnitario.val(precio || 0);
+            calcularValorProducto(index);
         } else {
             $descripcionInput.val('');
+            $precioUnitario.val(0);
+            calcularValorProducto(index);
         }
+    });
+
+    $(document).on('input change', '.cantidad-input', function() {
+        var index = $(this).data('index');
+        calcularValorProducto(index);
     });
 });
 </script>

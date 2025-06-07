@@ -29,7 +29,8 @@ public class TerminadoRestController {
 
             for (Terminado terminado : terminados) {
                 System.out.println("Terminado ID: " + terminado.getId() +
-                                 ", Medida: " + terminado.getMedidaTerminadoProducto());
+                        ", Medida: " + terminado.getMedidaTerminadoProducto() +
+                        ", Precio Público: " + terminado.getPrecioPublico());
             }
 
             return terminados;
@@ -42,6 +43,15 @@ public class TerminadoRestController {
 
     @GetMapping("/productos/all")
     public List<Producto> getAllProductos() {
-        return productoRepository.findAll();
+        System.out.println("=== OBTENIENDO TODOS LOS PRODUCTOS ===");
+        try {
+            List<Producto> productos = productoRepository.findAll();
+            System.out.println("Productos encontrados: " + productos.size());
+            return productos;
+        } catch (Exception e) {
+            System.err.println("Error al obtener productos: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
