@@ -8,6 +8,8 @@ import com.maxiguias.maxigestion.maxigestion.repositorio.EmpresaRepository;
 import com.maxiguias.maxigestion.maxigestion.repositorio.ProductoRepository;
 import com.maxiguias.maxigestion.maxigestion.repositorio.UsuarioRepository;
 import com.maxiguias.maxigestion.maxigestion.servicio.FacturaService;
+import com.maxiguias.maxigestion.maxigestion.servicio.UsuarioService;
+import com.maxiguias.maxigestion.maxigestion.servicio.EmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,10 +27,10 @@ public class FacturaController {
     private FacturaService facturaService;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
     @Autowired
-    private EmpresaRepository empresaRepository;
+    private EmpresaService empresaService;
 
     @Autowired
     private ProductoRepository productoRepository;
@@ -41,8 +43,9 @@ public class FacturaController {
         model.addAttribute("factura", new Factura());
         model.addAttribute("detalles", new ArrayList<DetalleFactura>());
 
-        model.addAttribute("usuarios", usuarioRepository.findAll());
-        model.addAttribute("empresas", empresaRepository.findAll());
+        // Use services that handle Oracle objects correctly
+        model.addAttribute("usuarios", usuarioService.listarUsuarios());
+        model.addAttribute("empresas", empresaService.listarEmpresas());
         model.addAttribute("productos", productoRepository.findAll());
         model.addAttribute("ciudades", ciudadRepository.findAll());
 

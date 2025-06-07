@@ -16,12 +16,12 @@
 
   <label>Usuario:</label>
   <select th:field="*{usuario.documento}">
-    <option th:each="u : ${usuarios}" th:value="${u.documento}" th:text="${u.nombre}"></option>
+    <option th:each="u : ${usuarios}" th:value="${u.documento}" th:text="${u.nombreCompleto}"></option>
   </select><br>
 
   <label>Empresa:</label>
   <select th:field="*{empresa.nitEmpresa}">
-    <option th:each="e : ${empresas}" th:value="${e.nitEmpresa}" th:text="${e.nombreEmpresa}"></option>
+    <option th:each="e : ${empresas}" th:value="${e.nitEmpresa}" th:text="${e.nombre}"></option>
   </select><br>
 
   <label>Ciudad:</label>
